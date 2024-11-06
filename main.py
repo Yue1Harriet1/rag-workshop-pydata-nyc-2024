@@ -72,8 +72,8 @@ class Workshop:
     def _split_documents(self):
         pass
 
-    def _load_model(self):
-        pass
+    def load_model(self):
+        self.model = ChatOpenAI(model="gpt-4o")
 
     def init_store(self):
         self.store = Chroma(
@@ -86,6 +86,10 @@ class Workshop:
         self.store.add_documents(documents=self.documents, ids=uuids)
 
     def init_rag(self):
+        prompt = ChatPromptTemplate([("system", SYSTEM_PROMPT), ("human", "{input}")])
+        question_answer_chain = create_stuff_documents_chain(self.model, prompt)
+        retriever = self.store.as_retriever()
+        self.rag = create_retrieval_chain(retriever, question_answer_chain)
         self.rag = create_retrieval_chain(
             self.store,
             self.model,
