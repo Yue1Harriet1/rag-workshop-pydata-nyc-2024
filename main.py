@@ -75,17 +75,25 @@ class Workshop:
     def _load_model(self):
         pass
 
-    def _init_store(self):
-        pass
+    def init_store(self):
+        self.store = Chroma(
+            collection_name = "workshop",
+            embedding_function = OpenAIEmbeddings()
+        )
 
-    def _add_documents(self):
-        pass
+    def add_documents(self):
+        uuids = [str(uuid4()) for _ in range(len(self.documents))]
+        self.store.add_documents(documents=self.documents, ids=uuids)
 
-    def _init_rag(self):
-        pass
+    def init_rag(self):
+        self.rag = create_retrieval_chain(
+            self.store,
+            self.model,
+            prompt_template = ChatPromptTemplate(SYSTEM_PROMPT),
+        )
 
-    def _embedding_search(self, query: str):
-        pass
+    def embedding_search(self, query: str):
+        return self.store.as_retriever().invoke(query)
 
     def _do_chat(self, input: str):
         pass
